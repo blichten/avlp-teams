@@ -1,0 +1,46 @@
+{
+    "name": "avlp/teams",
+    "description": "Team management and display functionality for the Virtual Leadership Programs platform",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Virtual Leadership Programs",
+            "email": "admin@virtualleadershipprograms.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "php": ">=7.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5",
+        "wp-coding-standards/wpcs": "^2.3",
+        "squizlabs/php_codesniffer": "^3.6",
+        "vimeo/psalm": "^4.0",
+        "phpcompatibility/php-compatibility": "^9.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "AVLP\\Teams\\": "includes/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "AVLP\\Teams\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test-coverage": "phpunit --coverage-html tests/coverage",
+        "cs": "phpcs --standard=WordPress --extensions=php --ignore=vendor/,tests/coverage/ .",
+        "cbf": "phpcbf --standard=WordPress --extensions=php --ignore=vendor/,tests/coverage/ .",
+        "psalm": "psalm --show-info=true",
+        "install-wp-tests": "bash bin/install-wp-tests.sh wordpress_test root '' localhost latest"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
+} 

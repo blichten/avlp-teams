@@ -1,0 +1,222 @@
+name: AVLP Teams - Regression Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run tests daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: wordpress_test
+          MYSQL_USER: wp_user
+          MYSQL_PASSWORD: wp_pass
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    strategy:
+      matrix:
+        php-version: [7.4, 8.0, 8.1]
+        wordpress-version: [5.9, 6.0, 6.1, latest]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php-version }}
+        extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, mysql, mysqli, pdo_mysql, bcmath, soap, intl, gd, exif, iconv, imagick
+        coverage: xdebug
+
+    - name: Install WordPress Test Suite
+      run: |
+        bash bin/install-wp-tests.sh wordpress_test wp_user wp_pass 127.0.0.1:3306 ${{ matrix.wordpress-version }}
+      env:
+        WP_TESTS_DIR: /tmp/wordpress-tests-lib
+        WP_CORE_DIR: /tmp/wordpress/
+
+    - name: Install dependencies
+      run: |
+        composer install --prefer-dist --no-progress --no-suggest
+        npm install
+
+    - name: Run PHPUnit tests
+      run: |
+        vendor/bin/phpunit --coverage-clover=coverage.xml
+      env:
+        WP_TESTS_DIR: /tmp/wordpress-tests-lib
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: true
+
+  security-scan:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: 8.1
+        extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, mysql, mysqli, pdo_mysql, bcmath, soap, intl, gd, exif, iconv, imagick
+
+    - name: Install Psalm
+      run: composer global require vimeo/psalm
+
+    - name: Install PHP_CodeSniffer
+      run: composer global require "squizlabs/php_codesniffer=*"
+
+    - name: Run security scan
+      run: |
+        ~/.composer/vendor/bin/psalm --show-info=true
+        ~/.composer/vendor/bin/phpcs --standard=WordPress --extensions=php --ignore=vendor/,tests/coverage/ .
+
+    - name: Check for known vulnerabilities
+      run: |
+        composer audit
+
+  e2e-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install dependencies
+      run: |
+        npm install
+        npx playwright install --with-deps
+
+    - name: Setup WordPress environment
+      run: |
+        docker-compose up -d
+        sleep 30
+        docker-compose exec -T wordpress wp core install --url=http://localhost:8080 --title="Test Site" --admin_user=admin --admin_password=password --admin_email=admin@example.com
+        docker-compose exec -T wordpress wp plugin activate avlp-teams
+
+    - name: Run E2E tests
+      run: |
+        npx playwright test
+      env:
+        BASE_URL: http://localhost:8080
+
+    - name: Upload E2E test results
+      uses: actions/upload-artifact@v3
+      if: failure()
+      with:
+        name: e2e-test-results
+        path: test-results/
+        retention-days: 30
+
+  performance-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install dependencies
+      run: |
+        npm install
+        npm install -g lighthouse
+
+    - name: Setup WordPress environment
+      run: |
+        docker-compose up -d
+        sleep 30
+        docker-compose exec -T wordpress wp core install --url=http://localhost:8080 --title="Test Site" --admin_user=admin --admin_password=password --admin_email=admin@example.com
+        docker-compose exec -T wordpress wp plugin activate avlp-teams
+
+    - name: Run Lighthouse performance tests
+      run: |
+        lighthouse http://localhost:8080 --output=json --output-path=lighthouse-results.json --chrome-flags="--headless"
+
+    - name: Upload performance results
+      uses: actions/upload-artifact@v3
+      with:
+        name: performance-results
+        path: lighthouse-results.json
+        retention-days: 30
+
+  accessibility-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install dependencies
+      run: |
+        npm install
+        npm install -g @axe-core/cli
+
+    - name: Setup WordPress environment
+      run: |
+        docker-compose up -d
+        sleep 30
+        docker-compose exec -T wordpress wp core install --url=http://localhost:8080 --title="Test Site" --admin_user=admin --admin_password=password --admin_email=admin@example.com
+        docker-compose exec -T wordpress wp plugin activate avlp-teams
+
+    - name: Run accessibility tests
+      run: |
+        axe http://localhost:8080 --exit
+
+  deployment:
+    needs: [unit-tests, security-scan, e2e-tests, performance-tests, accessibility-tests]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Deploy to staging
+      run: |
+        echo "Deploying to staging environment..."
+        # Add deployment script here
+        
+    - name: Run post-deployment tests
+      run: |
+        echo "Running post-deployment verification..."
+        # Add post-deployment verification here
+
+    - name: Notify team
+      if: always()
+      run: |
+        echo "Notifying team of deployment status..."
+        # Add notification logic here 

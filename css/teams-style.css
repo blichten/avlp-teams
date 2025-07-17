@@ -1,0 +1,250 @@
+/**
+ * AVLP Teams Plugin Styles
+ * Following VLP Development Standards
+ */
+
+/* Main container */
+.vlp-teams-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Team title */
+.vlp-teams-title {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2.5em;
+    color: #333;
+    font-weight: bold;
+}
+
+/* Team members grid */
+.vlp-teams-members {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+/* Individual member card */
+.vlp-teams-member-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: box-shadow 0.3s ease;
+}
+
+.vlp-teams-member-card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Team lead special styling */
+.vlp-teams-team-lead {
+    background: #bbd5fc; /* Faded Primary background for team leads */
+    border-color: #0066ff; /* Primary blue border */
+    border-width: 2px;
+}
+
+/* Member name */
+.vlp-teams-member-name {
+    font-size: 1.4em;
+    font-weight: bold;
+    color: #333;
+    margin: 0 0 10px 0;
+    display: flex;
+    align-items: center;
+}
+
+/* Team lead indicator */
+.vlp-teams-lead-indicator {
+    color: #ff6600; /* CTA/Focus orange */
+    font-size: 1.2em;
+    margin-left: 10px;
+    font-weight: bold;
+}
+
+/* Member role */
+.vlp-teams-member-role {
+    font-size: 1.1em;
+    color: #0066ff; /* Primary blue */
+    font-weight: 600;
+    margin: 0 0 8px 0;
+}
+
+/* Member title */
+.vlp-teams-member-title {
+    font-size: 1em;
+    color: #666;
+    font-style: italic;
+    margin: 0 0 15px 0;
+}
+
+/* Personality summary container */
+.vlp-teams-personality-summary {
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+    margin-top: 15px;
+}
+
+/* Personality row */
+.vlp-teams-personality-row {
+    font-size: 0.9em;
+    line-height: 1.4;
+    color: #444;
+}
+
+/* High trait styling (orange background) */
+.vlp-teams-trait-high {
+    background-color: #ff6600; /* CTA/Focus orange */
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: bold;
+    font-size: 0.85em;
+    margin: 0 2px;
+    display: inline-block;
+}
+
+/* Low trait styling (blue background) - Note: User specified #00FF66 but that's green, using blue per VLP standards */
+.vlp-teams-trait-low {
+    background-color: #0066ff; /* Primary blue */
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: bold;
+    font-size: 0.85em;
+    margin: 0 2px;
+    display: inline-block;
+}
+
+/* Error messages */
+.vlp-teams-error,
+.vlp-teams-subscription-error,
+.vlp-teams-membership-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 20px;
+    border-radius: 4px;
+    border: 1px solid #f5c6cb;
+    margin: 20px 0;
+}
+
+.vlp-teams-error p,
+.vlp-teams-subscription-error p,
+.vlp-teams-membership-error p {
+    margin: 0;
+}
+
+.vlp-teams-error a,
+.vlp-teams-subscription-error a,
+.vlp-teams-membership-error a {
+    color: #721c24;
+    text-decoration: underline;
+}
+
+.vlp-teams-error a:hover,
+.vlp-teams-subscription-error a:hover,
+.vlp-teams-membership-error a:hover {
+    color: #ff6600; /* CTA/Focus orange on hover */
+}
+
+/* Empty state */
+.vlp-teams-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+}
+
+.vlp-teams-empty h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .vlp-teams-members {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .vlp-teams-member-card {
+        padding: 15px;
+    }
+    
+    .vlp-teams-title {
+        font-size: 2em;
+        margin-bottom: 20px;
+    }
+    
+    .vlp-teams-member-name {
+        font-size: 1.2em;
+    }
+    
+    .vlp-teams-personality-row {
+        font-size: 0.8em;
+    }
+}
+
+@media (max-width: 480px) {
+    .vlp-teams-container {
+        padding: 15px;
+    }
+    
+    .vlp-teams-title {
+        font-size: 1.8em;
+    }
+    
+    .vlp-teams-member-card {
+        padding: 12px;
+    }
+    
+    .vlp-teams-trait-high,
+    .vlp-teams-trait-low {
+        font-size: 0.75em;
+        padding: 1px 4px;
+    }
+}
+
+/* Grid variations for different member counts */
+.vlp-teams-grid-small {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.vlp-teams-grid-medium {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.vlp-teams-grid-large {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+/* Accessibility improvements */
+.vlp-teams-member-card:focus {
+    outline: 2px solid #0066ff;
+    outline-offset: 2px;
+}
+
+.vlp-teams-trait-high:focus,
+.vlp-teams-trait-low:focus {
+    outline: 2px solid #fff;
+    outline-offset: 1px;
+}
+
+/* Print styles */
+@media print {
+    .vlp-teams-member-card {
+        break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+    
+    .vlp-teams-trait-high,
+    .vlp-teams-trait-low {
+        background-color: transparent !important;
+        color: #000 !important;
+        border: 1px solid #000;
+    }
+} 
