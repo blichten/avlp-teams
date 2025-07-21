@@ -25,6 +25,7 @@ define('VLP_TEAMS_PLUGIN_URL', plugin_dir_url(__FILE__));
 require_once VLP_TEAMS_PLUGIN_DIR . 'includes/teams-core-functions.php';
 require_once VLP_TEAMS_PLUGIN_DIR . 'includes/teams-shortcodes.php';
 require_once VLP_TEAMS_PLUGIN_DIR . 'includes/teams-display-functions.php';
+require_once VLP_TEAMS_PLUGIN_DIR . 'includes/teams-ajax-handlers.php';
 
 // Initialize plugin
 add_action('init', 'vlp_teams_init');
